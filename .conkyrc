@@ -1,0 +1,24 @@
+# ----------------------------------------------------------------------
+# file:     ~/.conkyrc
+# author:   Thayer Williams - http://cinderwick.ca
+# vim:enc=utf-8:nu:ai:si:et:ts=4:sw=4:ft=sh:
+# ----------------------------------------------------------------------
+
+background no
+out_to_console yes
+update_interval 3
+total_run_times 0
+use_spacer none
+
+# ${mpd_smart 20} 
+# [ ${loadavg 1} ]
+# ${acpitemp}°  
+# mail ${new_mails $HOME/mail/inbox}
+
+TEXT
+   ${loadavg 1 2 3} : \
+${freq 1}MHz ${cpu cpu1}%/${cpu cpu2}% : \
+${if_existing /sys/class/power_supply/BAT1/present}Bat ${battery_percent BAT1}% ${battery_time BAT1}${else}AC${endif} : \
+${if_empty ${exec ifconfig wlan0 | grep 'inet addr:'}}${upspeed eth0}K ${downspeed eth0}K${else}\
+${wireless_link_qual_perc wlan0}% ${wireless_essid wlan0} ${upspeed wlan0}K ${downspeed wlan0}K${endif} : \
+${time %b %d %H:%M} 
