@@ -1,6 +1,24 @@
 dwm extras
 ==========
 
-Scripts for displaying dwm statusbar messages as well as sessional scripts for
-starting dwm via xinit.
+Misc stuff relating to the dwm window manager (http://dwm.suckless.org)
+
+status
+------
+Scripts for displaying dwm statusbar messages
+
+
+session
+-------
+xinit session scripts for starting dwm
+
+
+slim-themes
+-----------
+dwm themes for the SLiM login manager
+
+
+wallpaper
+---------
+desktop wallpapers for dwm
 
