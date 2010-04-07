@@ -1,0 +1,261 @@
+################################################
+
+- In .xinitrc
+exec ~/bin/start-dwm
+
+- ~/bin/start-dwm
+#!/bin/bash
+~/bin/dwm-status | while true; do /usr/bin/dwm > /dev/null; done;
+
+- ~/bin/dwm-status
+#!/bin/bash
+while true
+do
+    xsetroot -name "$(date +'%R %d/%m/%Y')"
+    sleep 60
+done
+
+- ~/bin/get_statusbar
+#!/bin/bash
+echo $(get_uptime)" | "$(get_cputemp)@$(get_cpufreq)" |
+"$(get_freemem)/$(get_freeswap)" | "$(get_diskinfo
+sda1)/$(get_diskinfo sda3)/$(get_diskinfo sda4)/$(get_diskinfo
+sdb1)/$(get_diskinfo sdc1)/$(get_diskinfo sdd1)" | "$(get_updates)" |
+"$(get_volume PCM)/$(get_batterycharge)/$(get_batterycapacity)/$(get_batteryremain)"
+| "$(date +'%R %d/%m/%Y')
+
+- ~/bin/get_dzen_statusbar
+#!/bin/bash
+(echo $(get_statusbar);sleep 30) | dzen2 -l 1 -x o -y o -w 1024 -fn
+-*-fixed-medium-r-*-*-18-*-*-*-*-*-iso8859-* -bg black -fg grey
+
+- ~/bin/get_uptime
+#!/bin/bash
+upSeconds=`cat /proc/uptime`;
+upSeconds=${upSeconds%%.*};
+let secs=$((${upSeconds}%60))
+let mins=$((${upSeconds}/60%60))
+let hours=$((${upSeconds}/3600%24))
+let days=$((${upSeconds}/86400))
+if [ "${days}" -ne "0" ]
+then
+           echo -n "${days}d:"
+fi
+echo -n "${hours}h:${mins}m"
+
+- ~/bin/get_cputemp
+#!/bin/bash
+cat /proc/acpi/thermal_zone/THRM/temperature | awk '{print $2}'
+
+- ~/bin/get_freemem
+#!/bin/bash
+free -m | grep - | awk '{print $4}
+
+- ~/bin/get_freeswap
+#!/bin/bash
+free -m | grep Swap | awk '{print $4}'
+
+- ~/bin/get_diskinfo
+#!/bin/bash
+dev=$(df -mh | grep /dev/$1 | awk '{print $4}')
+if [ "$dev" == "" ]; then
+        echo "X"
+else
+df -mh | grep /dev/$1 | awk '{print $4}' | tr -d G
+fi
+
+- ~/bin/get_gmail
+#!/bin/bash
+gmail_login="xxxxxxx.xxxxxxxx" #without the @gmail.com
+gmail_password="xxxxxxxxxxxxx"
+
+dane="$(wget --secure-protocol=TLSv1 --timeout=3 -t 1 -q -O - \
+https://${gmail_login}:${gmail_password}@mail.google.com/mail/feed/atom \
+--no-check-certificate | grep 'fullcount' \
+| sed -e 's/.*<fullcount>//;s/<\/fullcount>.*//' 2>/dev/null)"
+
+if [ -z "$dane" ]; then
+        echo "X"
+else
+        echo "$dane"
+fi
+
+- ~/bin/get_updates
+#! /usr/bin/perl -w
+use strict;
+# November 15, 2006
+# Daniel Vredenburg (Vredfreak)
+# This is a program that checks for package updates for Arch Linux users.
+
+open (MYINPUTFILE, "/home/aleyscha/bin/arch-updates/updates.log") or
+die "No such file or directory: $!";
+
+my $i = 0;
+while(<MYINPUTFILE>)
+{
+        if (/^(.*)\/(.*)(\..*\..*\.)/) {
+                #print " \n";
+                $i++;
+        }
+
+}
+if ($i == 0) {
+        print "0";
+} else {
+        print "$i";
+}
+close(MYINPUTFILE);
+
+- ~/bin/arch-updates/pacsync.sh #need to symlink in /etc/cron.hourly/pacsync.sh
+#!/bin/bash
+
+# This issues a command to 1. Sync the package database,
+# 2. Check for upgradable packages, 3. print the URL of any possible upgrade.
+# The output of our command gets written to updates.log, which we will use
+# conky_updates.sh to parse to see if there are any available updates.
+
+pacman -Syup --noprogressbar > /home/aleyscha/bin/arch-updates/updates.log
+
+- ~/bin/get_volume
+#!/bin/bash
+amixer sget $1 | tail -n 1 | gawk '{print $5}' | tr -d [%]
+
+- ~/bin/get_batterycharge
+#!/bin/bash
+#BATT=$(acpi | cut -d " " -f 9 | sed s/,//g | tr -d %)
+BATT=$(acpi | awk '{print $4}' | tr -d %,)
+if [ "$BATT" = "" ]; then
+        echo X
+else
+        echo $BATT
+fi
+
+- in dwm's config.h i have
+static const char *statusbar[] = { "get_dzen_statusbar", NULL };
+
+and
+
+{ MODKEY, XK_c, spawn, {.v = statusbar } },
+
+hope you like it! 
+
+#####################################################
+
+
+$ cat .dwm.sh
+#!/bin/sh
+
+TEMP=$(awk '{print $2}' /proc/acpi/thermal_zone/TZ00/temperature)
+LOAD=$(awk '{print $1}' /proc/loadavg)
+DATE=$(date "+%D %T")
+
+STATE=$(grep '^charging state:' /proc/acpi/battery/BAT0/state | awk '{print $NF}')
+REMAINS=$(grep '^remaining capacity:' /proc/acpi/battery/BAT0/state | awk '{print $(NF-1)}')
+RATE=$(grep '^present rate:' /proc/acpi/battery/BAT0/state | awk '{print $(NF-1)}')
+
+MAH_MAX=$(grep '^last full capacity:' /proc/acpi/battery/BAT0/info | awk '{print $(NF-1)}')
+MAH_MIN=$(grep '^design capacity warning:' /proc/acpi/battery/BAT0/info | awk '{print $(NF-1)}')
+
+PERC_LEFT=$((${REMAINS}*100/${MAH_MAX}))
+
+case $STATE in
+        charging)
+                if [[ $RATE -eq 0 ]]; then
+                TIME_LEFT="∞"
+                else
+                TIME_LEFT=$(($((${MAH_MAX}-${REMAINS}))*60/$RATE))min
+                fi
+                ;;
+        discharging)
+                TIME_LEFT=$(($((${REMAINS}-${MAH_MIN}))*60/$RATE))min
+                ;;
+        charged)
+                TIME_LEFT="full"
+                ;;
+        *)
+                TIME_LEFT=$STATE
+                ;;
+esac
+
+echo ${TIME_LEFT} $PERC_LEFT% $LOAD ${TEMP}*C $DATE 
+
+
+########################################################
+
+ Right now I'm using this for
+termperature, memory, wifi, date:
+
+#!/bin/sh
+
+while true
+    do
+        xsetroot -name
+"`cat /proc/acpi/thermal_zone/THRM/temperature | sed -e
+'s/temperature://g' -e 's/\ //g'` | `free -m | tail -2 | head -1 | sed
+-e 's/-\/+//g' | sed 's/buffers\/cache://g' | cut -d' ' -f11,12 | sed
+-e 's/\ //g'`MB | `cat /proc/net/wireless | tail -1 | sed -e
+'s/wlan0://g' -e 's/0000//g' -e 's/\ \ //g' | cut -d' ' -f1,2 | sed -e
+'s/\ //g'`% | `date '+%a %b %d %Y %T'`"
+        sleep 1
+done &
+exec dwm
+
+The only problem with this is when memory goes over 100MB, it doesn't
+show up (need to fix that). 
+
+###############################################################
+
+VERSION II OF ABOVE:
+
+#!/bin/sh
+
+xmodmap $HOME/.xmodmap
+bgs media/pics/wallpapers/evisceration_plague_wallpaper2_1600x1200.jpg &
+while true
+    do
+        xsetroot -name "`sed -e
+        's/\ //g' /proc/acpi/thermal_zone/THRM/temperature | colrm 1 12` |
+        `free -m | tail -2 | head -1 | colrm 1 27 | colrm 3`MB | `tail\
+        -1 /proc/net/wireless | colrm 1 15 | colrm 3`% | `date '+%a %b %d %Y
+        %T'`"
+        sleep 1
+done &
+exec dwm 
+
+#################################################################
+
+cat .status |~
+#!/bin/sh
+        sswriter \
+        -w 10 \
+        -f /home/stanio/.current_song /home/stanio/.recent_events \
+        -a 20 25 \
+        -t THRM \
+        -D eth0 eth2 \
+        -d "%Y-%m-%d %a %H:%M'%S" \
+        -s PCM Master Mic \
+        "%[ | %f0%] %[ | %f1%] |%(B* WARNING * BATTERY *%)%(b%v1%V1 %v2%V2| %d| %m %sMB| %n%(w %q%%%) %i:%o kB| %C0MHz %p0%%| %b0%%| %t0�C%)"
+
+Sswriter is pretty powerful c program posted perhaps more than year
+ago on the wmii mailing list, as I was still half wmii user. I use a
+patched 0.3.1 version.
+
+sample output of ./.status is:
+ song | event |81on 80off| 2009-05-09 Sat 11:44'18| 278 0MB| eth0 0.0:0.0 kB| 798MHz 46%| 100%| 53�C
+
+which translates to
+
+ song|event|volume of headphones and micropone|date|memory+swap|link|cpu|battery|temp
+
+For those interested:
+
+http://www.mail-archive.com/wmii@suckless.org/msg01935.html
+
+I noticed I very rarely look at most of the stuff in this status bar thoug,
+so I am thinking of 2 staged status query -- e.g. date/time and temp in the
+dwm status bar; The rest can be queried 'on demand' in the console. 
+
+######################################################################
+
+
+
