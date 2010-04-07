@@ -1,0 +1,44 @@
+dwm SLiM themes
+===============
+
+Introduction
+------------
+This package contains login themes for the SLiM login manager 
+(http://slim.berlios.de/), intended for dwm fans (http://suckless.org/).
+
+Four styles are available, each with a light and dark colour scheme.
+Each theme dir includes the GIMP source file if modification is desired.
+
+
+Requirements
+------------
+For proper viewing, these themes rely on the 'egdes' typeface (font),
+from Artwiz (http://artwizaleczapka.sourceforge.net/).  These fonts 
+may already be available from your distribution's repository.  
+
+Arch Linux users can install them by running the following as root:
+
+    # pacman -S artwiz-fonts
+
+The fonts can also be installed manually, using the included tarball.
+
+
+Installation
+------------
+Installation will depend upon your distribution; typically SLiM themes
+are placed in '/usr/share/slim/themes/'
+
+Once installed, activate a given theme by editing the SLiM config,
+located at '/etc/slim.conf' for Arch Linux users. Change the value for 
+'current_theme' to the name of the desired theme folder, for example:
+
+    current_theme   dwm02
+
+
+Modifications and/or Redistribution
+-----------------------------------
+These themes are licensed Creative Commons. 
+For full license details, refer to the COPYING file.
+Artwiz fonts are GPL v2 licenced--see the COPYING file within
+the artwiz tarball for full details.
+

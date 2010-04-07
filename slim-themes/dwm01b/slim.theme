@@ -1,0 +1,42 @@
+# dwm theme for SLiM
+# by Thayer Williams 
+# email: thayerw AT gmail DOT com
+# website: http://cinderwick.ca/
+
+# Messages (ie: shutdown)
+msg_color               #222222
+msg_font                edges
+msg_x                   50%
+msg_y                   65%
+
+# valid values: stretch, tile
+background_style        tile
+background_color        #000000
+
+# Input controls (relative to panel)
+input_panel_x           50%
+input_panel_y           50%
+input_name_x            163
+input_name_y            132
+input_pass_x            163
+input_pass_y            146
+input_font          	edges
+input_color             #222222
+
+# Username / password request (relative to panel)
+username_font          	edges
+username_color        	#222222
+username_x              98
+username_y              132
+password_x              98
+password_y              146
+
+username_msg            username  <
+password_msg            password  <
+
+#welcome message (relative to panel)
+#welcome_x               135
+#welcome_y               25
+#welcome_font            edges
+#welcome_color           #ffffff
+
