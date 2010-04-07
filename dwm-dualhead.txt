@@ -1,0 +1,103 @@
+Date: Sat, 20 Jun 2009 17:27:48 +0100                                                                                
+From: Anselm R Garbe <garbeam@gmail.com>                                                                             
+To: dev mail list <dev@suckless.org>                                                                                 
+Subject: [dev] Re: dwm development continues NOW                                                                     
+
+An initial version of the new xinerama support is committed into hg,
+it's not finished/polished yet, but the basics are usable already.
+During the development I decided to have a bar per monitor, instead of
+just one bar. It's less confusing that way.
+
+Monitors are currently selected through pressing Mod1-w, Mod1-e (just
+two initial keybindings), and clients are assigned to the selected
+monitor and can be re-assigned using Mod1-Shift-w, Mod1-Shift-e resp.
+
+There are several bugs still, esp. related to the floating handling
+(it's currently possible to have a floating client assigned to a
+monitor even if it's shown on a totally different monitor).
+ 
+The code will have a lot of polishing and some config.h options will
+go away possibly... one candidate is topbar.
+
+Bug reports welcome.
+
+Please don't do code reviews yet, I know that it's ugly and needs polishing.
+
+Kind regards,
+Anselm
+
+--
+
+
+
+Well I rechecked the source and it would make dwm considerably more
+complex, especially the root window checks would be all over the
+place. No no ;)
+Classic multihead support is achieved using the classic way:
+
+DISPLAY=:0.0 dwm &
+DISPLAY=:0.1 dwm &
+
+etc
+
+Now I'm at simplifying what has appeared so far...
+
+Kind regards,
+Anselm
+
+--
+
+
+I think people on this have lately been confusing "dualhead"
+with
+"Xinerama". Someone asked about this earlier, and he just wanted
+to
+clone screens. In any case, suppose we have two 1024x768 monitors,
+we
+can use them in two
+ways:                                                                                                                                                           
+                                                                                                                                                                                    
+MODE
+1
+- Two X displays, :0.0 and :0.1, each
+1024x768
+- This is sometimes called "Zaphod"
+mode.
+- This mode sucks because you can't move windows from one screen
+to
+the
+other.
+- This mode is not supported by the intel
+driver.                                                                                                                                   
+                                                                                                                                                                                    
+MODE
+2
+- One merged display, :0.0 which is 2048x768 or 1024x1536 (your
+choice)
+- If I understand correctly, this is Xinerama or mergedFB or
+TwinView
+mode.
+- This requires help from the window
+manager.
+- Xrandr lets you switch between 2048x768 and 1024x1536
+without
+restarting X. It's fantastic.                                                                                      
+                                                                                                                    
+You can compile dwm without Xinerama support (#undef XINERAMA) and use
+Xorg with MODE 2. You end up with one giant display. If you compile
+with -DXINERAMA, you have what you've described, where the second
+screen is used for floating windows.  "Xinerama support" just means
+that dwm knows that the giant display consists of two screens, and can
+avoid using dead space if the screens are different sizes.                                               
+                                                                                                                    
+When people say that xorg is dropping Xinerama support, I believe it's
+the Xinerama implementation that's being dropped, not the API or wire
+protocol.  XineramaQueryScreens() works correctly on my netbook with
+xorg 7.3 and intel driver.                                                                                             
+                                                                                                                           
+With that out of the way, I'd suggest you look at dwm-gtx.  I tried it
+on my Acer Aspire One (with intel 945), and it worked well.  The
+difference between dwm-gtx and "awesome" (besides code bloat) is that
+"awesome" manages tags for each screen independently.  If I press
+MOD-1 in "awesome", it switches the tag on the current screen.  In
+dwm-gtx, it switches both screens.     
