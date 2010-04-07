@@ -1,0 +1,7 @@
+static const char normbordercolor[] = "#dcebbd";
+static const char normbgcolor[]     = "#eeffc6";
+static const char normfgcolor[]     = "#278e98";
+static const char selbordercolor[]  = "#98d200";
+static const char selbgcolor[]      = "#88bb00";
+static const char selfgcolor[]      = "#eeffc6";
+
